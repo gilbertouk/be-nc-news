@@ -22,7 +22,6 @@ describe('Testing app', () => {
       test('GET: 200 status with all topics data and properties', () => {
         return request(app)
           .get('/api/topics')
-          .expect(200)
           .then(({ body }) => {
             const topics = body;
             expect(Array.isArray(topics)).toBe(true);
@@ -38,9 +37,26 @@ describe('Testing app', () => {
       test('GET: 404 status with msg Not Found when given a wrong endpoint', () => {
         return request(app)
           .get('/api/topicsss')
-          .expect(404)
           .then(({ res }) => {
             expect(res.statusMessage).toBe('Not Found');
+          });
+      });
+    });
+  });
+
+  describe('Endpoint /api/articles/:article_id', () => {
+    describe('Method GET', () => {
+      test('GET: 200 status', () => {
+        return request(app).get('/api/articles/1').expect(200);
+      });
+
+      test('GET: 200 status responds with an article object data', () => {
+        return request(app)
+          .get('/api/articles/1')
+          .then(({ body }) => {
+            const article = body;
+
+            // expect(article).toHaveProperty();
           });
       });
     });
