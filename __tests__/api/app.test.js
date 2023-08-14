@@ -1,9 +1,9 @@
-const request = require("supertest");
-const app = require("../../app");
-const seedTestData = require("../../db/data/test-data");
-const seed = require("../../db/seeds/seed");
-const db = require("../../db/connection");
-const endpoints = require("../../endpoints.json");
+const request = require('supertest');
+const app = require('../../app');
+const seedTestData = require('../../db/data/test-data');
+const seed = require('../../db/seeds/seed');
+const db = require('../../db/connection');
+const endpoints = require('../../endpoints.json');
 
 afterAll(() => {
   return db.end();
@@ -13,52 +13,52 @@ beforeEach(() => {
   return seed(seedTestData);
 });
 
-describe("Testing app", () => {
-  describe("Endpoint /api/topics", () => {
-    describe("Method GET", () => {
-      test("GET: 200 status", () => {
-        return request(app).get("/api/topics").expect(200);
+describe('Testing app', () => {
+  describe('Endpoint /api/topics', () => {
+    describe('Method GET', () => {
+      test('GET: 200 status', () => {
+        return request(app).get('/api/topics').expect(200);
       });
 
-      test("GET: 200 status with all topics data and properties", () => {
+      test('GET: 200 status with all topics data and properties', () => {
         return request(app)
-          .get("/api/topics")
-          .expect(200)
+          .get('/api/topics')
           .then(({ body }) => {
             const topics = body;
+            const expectTopics = [
+              { slug: 'mitch', description: 'The man, the Mitch, the legend' },
+              { slug: 'cats', description: 'Not dogs' },
+              { slug: 'paper', description: 'what books are made of' },
+            ];
+
             expect(Array.isArray(topics)).toBe(true);
             expect(topics).toHaveLength(3);
-
-            topics.forEach((item) => {
-              expect(item).toHaveProperty("slug", expect.any(String));
-              expect(item).toHaveProperty("description", expect.any(String));
-            });
+            expect(topics).toMatchObject(expectTopics);
           });
       });
 
-      test("GET: 404 status with msg Not Found when given a wrong endpoint", () => {
+      test('GET: 404 status with msg Not Found when given a wrong endpoint', () => {
         return request(app)
-          .get("/api/topicsss")
+          .get('/api/topicsss')
           .expect(404)
           .then(({ res }) => {
-            expect(res.statusMessage).toBe("Not Found");
+            expect(res.statusMessage).toBe('Not Found');
           });
       });
     });
   });
 
-  describe("Endpoint /api", () => {
-    describe("Method GET", () => {
-      test("GET: 200 status", () => {
-        return request(app).get("/api").expect(200);
+  describe('Endpoint /api', () => {
+    describe('Method GET', () => {
+      test('GET: 200 status', () => {
+        return request(app).get('/api').expect(200);
       });
 
-      test("GET: 200 responds with an object describing all the available endpoints on your API", () => {
+      test('GET: 200 responds with an object describing all the available endpoints on your API', () => {
         return request(app)
-          .get("/api")
-          .expect(200)
+          .get('/api')
           .then(({ body }) => {
-            const apiEndpoints = body;
+            const apiEndpoints = body.endpoints;
 
             expect(apiEndpoints.constructor === Object).toBe(true);
             expect(apiEndpoints).toEqual(endpoints);
