@@ -26,6 +26,7 @@ describe('Testing app', () => {
           .then(({ body }) => {
             const topics = body;
             expect(Array.isArray(topics)).toBe(true);
+            expect(topics).toHaveLength(3);
 
             topics.forEach((item) => {
               expect(item).toHaveProperty('slug', expect.any(String));
