@@ -45,4 +45,10 @@ describe('Testing app', () => {
       });
     });
   });
+
+  describe('Endpoint /api', () => {
+    describe('Method GET', () => {
+      test('', () => {});
+    });
+  });
 });
