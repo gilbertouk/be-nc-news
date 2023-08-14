@@ -113,4 +113,61 @@ describe('Testing app', () => {
       });
     });
   });
+
+  describe('Endpoint /api/articles', () => {
+    describe('Method GET', () => {
+      test('GET: 200 status', () => {
+        return request(app).get('/api/articles').expect(200);
+      });
+
+      test('GET: 200 status responds with an articles array of article objects', () => {
+        return request(app)
+          .get('/api/articles')
+          .then(({ body }) => {
+            const articles = body;
+
+            expect(articles).toHaveLength(13);
+
+            articles.forEach((article) => {
+              expect(article).toHaveProperty('author', expect.any(String));
+              expect(article).toHaveProperty('title', expect.any(String));
+              expect(article).toHaveProperty('article_id', expect.any(Number));
+              expect(article).toHaveProperty('topic', expect.any(String));
+              expect(article).toHaveProperty('created_at');
+              expect(new Date(article.created_at)).toBeDate();
+              expect(article).toHaveProperty('votes', expect.any(Number));
+              expect(article).toHaveProperty(
+                'article_img_url',
+                expect.any(String)
+              );
+              expect(article).toHaveProperty(
+                'comment_count',
+                expect.any(String)
+              );
+            });
+          });
+      });
+
+      test('GET: 200 status responds with the articles should be sorted by date in descending order', () => {
+        return request(app)
+          .get('/api/articles')
+          .then(({ body }) => {
+            const articles = body;
+            expect(articles).toBeSortedBy('created_at', { descending: true });
+          });
+      });
+
+      test('GET: 200 status responds and there should not be a body property present on any of the article objects', () => {
+        return request(app)
+          .get('/api/articles')
+          .then(({ body }) => {
+            const articles = body;
+
+            articles.forEach((article) => {
+              expect(article).not.toContainKey('body');
+            });
+          });
+      });
+    });
+  });
 });
