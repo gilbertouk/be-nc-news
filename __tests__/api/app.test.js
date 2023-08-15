@@ -4,6 +4,7 @@ const seedTestData = require('../../db/data/test-data');
 const seed = require('../../db/seeds/seed');
 const db = require('../../db/connection');
 const endpoints = require('../../endpoints.json');
+const { expect } = require('@jest/globals');
 
 afterAll(() => {
   return db.end();
@@ -246,6 +247,110 @@ describe('Testing app', () => {
       test('GET: 400 status when given invalid article_id', () => {
         return request(app)
           .get('/api/articles/invalid-id/comments')
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+    });
+
+    describe('Method POST', () => {
+      test('POST: 201 status', () => {
+        return request(app)
+          .post('/api/articles/2/comments')
+          .send({ username: 'rogersop', body: 'comment test' })
+          .expect(201);
+      });
+
+      test('POST: 201 status responds wih the posted comment', () => {
+        return request(app)
+          .post('/api/articles/2/comments')
+          .send({ username: 'rogersop', body: 'comment test' })
+          .then(({ body }) => {
+            const { comment } = body;
+
+            const expectComment = {
+              comment_id: 19,
+              body: 'comment test',
+              article_id: 2,
+              author: 'rogersop',
+              votes: 0,
+              created_at: comment.created_at,
+            };
+
+            expect(comment).toMatchObject(expectComment);
+          });
+      });
+
+      test('POST: 201 status responds wih the posted comment and ignored extra properties on the request body', () => {
+        return request(app)
+          .post('/api/articles/2/comments')
+          .send({
+            username: 'rogersop',
+            body: 'Other comment test',
+            key: 'banana',
+          })
+          .then(({ body }) => {
+            const { comment } = body;
+
+            const expectComment = {
+              comment_id: 19,
+              body: 'Other comment test',
+              article_id: 2,
+              author: 'rogersop',
+              votes: 0,
+              created_at: comment.created_at,
+            };
+
+            expect(comment).not.toContainKey('key');
+            expect(comment).toMatchObject(expectComment);
+          });
+      });
+
+      test('POST: 404 status when given article_id does not exist e.g 999', () => {
+        return request(app)
+          .post('/api/articles/999/comments')
+          .send({ username: 'rogersop', body: 'comment test' })
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Resource not found');
+          });
+      });
+
+      test('POST: 400 status when given invalid article_id e.g /api/articles/invalid/comments', () => {
+        return request(app)
+          .post('/api/articles/invalid/comments')
+          .send({ username: 'rogersop', body: 'comment test' })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+
+      test('POST: 400 status when given empty comment data', () => {
+        return request(app)
+          .post('/api/articles/1/comments')
+          .send({})
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+
+      test('POST: 404 status when given incorrect comment data (username that is not in our users database)', () => {
+        return request(app)
+          .post('/api/articles/1/comments')
+          .send({ username: 'test', body: 'test' })
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Resource not found');
+          });
+      });
+
+      test('POST: 400 status when given valid article_id and invalid body property', () => {
+        return request(app)
+          .post('/api/articles/1/comments')
+          .send({ username: 'rogersop' })
           .expect(400)
           .then(({ body }) => {
             expect(body.msg).toBe('Bad request');
