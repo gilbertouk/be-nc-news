@@ -25,10 +25,7 @@ const postArticleComment = (req, res, next) => {
   const { body } = req;
   const { article_id } = req.params;
 
-  selectArticleById(article_id)
-    .then(() => {
-      return insertArticleComment(article_id, body);
-    })
+  insertArticleComment(article_id, body)
     .then((data) => {
       res.status(201).send({ comment: data });
     })

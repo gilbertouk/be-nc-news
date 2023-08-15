@@ -255,28 +255,55 @@ describe('Testing app', () => {
     });
 
     describe('Method POST', () => {
-      test('GET: 201 status responds wih the posted comment', () => {
+      test('POST: 201 status', () => {
         return request(app)
           .post('/api/articles/2/comments')
           .send({ username: 'rogersop', body: 'comment test' })
           .expect(201);
       });
 
-      test('GET: 201 status', () => {
+      test('POST: 201 status responds wih the posted comment', () => {
         return request(app)
           .post('/api/articles/2/comments')
           .send({ username: 'rogersop', body: 'comment test' })
           .then(({ body }) => {
             const { comment } = body;
 
-            expect(comment).toHaveProperty('comment_id', 19);
-            expect(comment).toHaveProperty('body', 'comment test');
-            expect(comment).toHaveProperty('article_id', 2);
-            expect(comment).toHaveProperty('author', 'rogersop');
-            expect(comment).toHaveProperty('votes', 0);
-            expect(comment).toHaveProperty('created_at');
-            expect(comment).toHaveProperty('created_at');
-            expect(new Date(comment.created_at)).toBeDate();
+            const expectComment = {
+              comment_id: 19,
+              body: 'comment test',
+              article_id: 2,
+              author: 'rogersop',
+              votes: 0,
+              created_at: comment.created_at,
+            };
+
+            expect(comment).toMatchObject(expectComment);
+          });
+      });
+
+      test('POST: 201 status responds wih the posted comment and ignored extra properties on the request body', () => {
+        return request(app)
+          .post('/api/articles/2/comments')
+          .send({
+            username: 'rogersop',
+            body: 'Other comment test',
+            key: 'banana',
+          })
+          .then(({ body }) => {
+            const { comment } = body;
+
+            const expectComment = {
+              comment_id: 19,
+              body: 'Other comment test',
+              article_id: 2,
+              author: 'rogersop',
+              votes: 0,
+              created_at: comment.created_at,
+            };
+
+            expect(comment).not.toContainKey('key');
+            expect(comment).toMatchObject(expectComment);
           });
       });
 
@@ -302,7 +329,7 @@ describe('Testing app', () => {
 
       test('GET: 400 status when given empty comment data', () => {
         return request(app)
-          .post('/api/articles/invalid/comments')
+          .post('/api/articles/1/comments')
           .send({})
           .expect(400)
           .then(({ body }) => {
@@ -312,7 +339,7 @@ describe('Testing app', () => {
 
       test('GET: 400 status when given incorrect comment data (invalid username)', () => {
         return request(app)
-          .post('/api/articles/invalid/comments')
+          .post('/api/articles/1/comments')
           .send({ username: 'test' })
           .expect(400)
           .then(({ body }) => {
