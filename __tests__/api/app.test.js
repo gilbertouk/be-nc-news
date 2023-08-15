@@ -223,6 +223,17 @@ describe('Testing app', () => {
           });
       });
 
+      test('GET: 200 status responds whit an empty array when there are no comments for the article', () => {
+        return request(app)
+          .get('/api/articles/2/comments')
+          .expect(200)
+          .then(({ body }) => {
+            const { comments } = body;
+
+            expect(comments).toEqual([]);
+          });
+      });
+
       test('GET: 404 status when given article_id does not exist', () => {
         return request(app)
           .get('/api/articles/500/comments')

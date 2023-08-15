@@ -7,10 +7,6 @@ const selectCommentsByArticleId = (article_id) => {
       [article_id]
     )
     .then(({ rows }) => {
-      if (rows.length === 0) {
-        return Promise.reject({ status: 404, msg: 'Resource not found' });
-      }
-
       return rows;
     });
 };
