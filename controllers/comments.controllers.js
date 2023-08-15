@@ -1,4 +1,7 @@
-const { selectCommentsByArticleId } = require('../models/comments.models');
+const {
+  selectCommentsByArticleId,
+  deleteComment,
+} = require('../models/comments.models');
 const { selectArticleById } = require('../models/articles.models');
 
 const getAllCommentsByArticleId = (req, res, next) => {
@@ -18,4 +21,15 @@ const getAllCommentsByArticleId = (req, res, next) => {
     });
 };
 
-module.exports = { getAllCommentsByArticleId };
+const deleteCommentById = (req, res, next) => {
+  const { comment_id } = req.params;
+  deleteComment(comment_id)
+    .then(() => {
+      res.status(204).send();
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+module.exports = { getAllCommentsByArticleId, deleteCommentById };

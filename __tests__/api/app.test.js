@@ -4,6 +4,7 @@ const seedTestData = require('../../db/data/test-data');
 const seed = require('../../db/seeds/seed');
 const db = require('../../db/connection');
 const endpoints = require('../../endpoints.json');
+const { expect } = require('@jest/globals');
 
 afterAll(() => {
   return db.end();
@@ -246,6 +247,40 @@ describe('Testing app', () => {
       test('GET: 400 status when given invalid article_id', () => {
         return request(app)
           .get('/api/articles/invalid-id/comments')
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+    });
+  });
+
+  describe('Endpoint /api/comments/:comment_id', () => {
+    describe('Method DELETE', () => {
+      test('DELETE: 204 status', () => {
+        return request(app)
+          .delete('/api/comments/1')
+          .expect(204)
+          .then(() => {
+            return db.query('SELECT * FROM comments WHERE comment_id = 1');
+          })
+          .then(({ rows }) => {
+            expect(rows.length).toBe(0);
+          });
+      });
+
+      test('DELETE: 404 status when given comment_id does not exist e.g /api/comments/999', () => {
+        return request(app)
+          .delete('/api/comments/999')
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Resource not found');
+          });
+      });
+
+      test('DELETE: 400 status when given invalid comment_id e.g /api/comments/ab', () => {
+        return request(app)
+          .delete('/api/comments/ab')
           .expect(400)
           .then(({ body }) => {
             expect(body.msg).toBe('Bad request');

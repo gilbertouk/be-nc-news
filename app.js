@@ -6,6 +6,7 @@ const {
 } = require('./controllers/articles.controllers');
 const {
   getAllCommentsByArticleId,
+  deleteCommentById,
 } = require('./controllers/comments.controllers');
 const endpoints = require('./endpoints.json');
 
@@ -19,6 +20,8 @@ app.get('/api/topics', getAllTopics);
 app.get('/api/articles/:article_id', getArticlesById);
 app.get('/api/articles', getAllArticles);
 app.get('/api/articles/:article_id/comments', getAllCommentsByArticleId);
+
+app.delete('/api/comments/:comment_id', deleteCommentById);
 
 app.use((req, res) => {
   res.status(404).send({ msg: 'Not found' });
