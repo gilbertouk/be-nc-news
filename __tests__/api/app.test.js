@@ -176,4 +176,81 @@ describe('Testing app', () => {
       });
     });
   });
+
+  describe('Endpoint /api/articles/:article_id/comments', () => {
+    describe('Method GET', () => {
+      test('GET: 200 status', () => {
+        return request(app).get('/api/articles/1/comments').expect(200);
+      });
+
+      test('GET: 200 status responds with an array of comments for the given article_id of which each comment', () => {
+        return request(app)
+          .get('/api/articles/3/comments')
+          .then(({ body }) => {
+            const { comments } = body;
+            const expectComments = [
+              {
+                comment_id: 11,
+                votes: 0,
+                created_at: '2020-09-19T23:10:00.000Z',
+                author: 'icellusedkars',
+                body: 'Ambidextrous marsupial',
+                article_id: 3,
+              },
+              {
+                comment_id: 10,
+                votes: 0,
+                created_at: '2020-06-20T07:24:00.000Z',
+                author: 'icellusedkars',
+                body: 'git push origin master',
+                article_id: 3,
+              },
+            ];
+
+            expect(comments).toHaveLength(2);
+            expect(comments).toMatchObject(expectComments);
+          });
+      });
+
+      test('GET: 200 status responds and comments should be served with the most recent comments first.', () => {
+        return request(app)
+          .get('/api/articles/1/comments')
+          .then(({ body }) => {
+            const { comments } = body;
+
+            expect(comments).toHaveLength(11);
+            expect(comments).toBeSortedBy('created_at', { descending: true });
+          });
+      });
+
+      test('GET: 200 status responds whit an empty array when there are no comments for the article', () => {
+        return request(app)
+          .get('/api/articles/2/comments')
+          .expect(200)
+          .then(({ body }) => {
+            const { comments } = body;
+
+            expect(comments).toEqual([]);
+          });
+      });
+
+      test('GET: 404 status when given article_id does not exist', () => {
+        return request(app)
+          .get('/api/articles/500/comments')
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Resource not found');
+          });
+      });
+
+      test('GET: 400 status when given invalid article_id', () => {
+        return request(app)
+          .get('/api/articles/invalid-id/comments')
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+    });
+  });
 });
