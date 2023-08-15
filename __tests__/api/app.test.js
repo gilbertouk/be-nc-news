@@ -307,9 +307,9 @@ describe('Testing app', () => {
           });
       });
 
-      test('GET: 404 status when given article_id does not exist', () => {
+      test('POST: 404 status when given article_id does not exist e.g 999', () => {
         return request(app)
-          .post('/api/articles/200/comments')
+          .post('/api/articles/999/comments')
           .send({ username: 'rogersop', body: 'comment test' })
           .expect(404)
           .then(({ body }) => {
@@ -317,7 +317,7 @@ describe('Testing app', () => {
           });
       });
 
-      test('GET: 400 status when given invalid article_id', () => {
+      test('POST: 400 status when given invalid article_id e.g /api/articles/invalid/comments', () => {
         return request(app)
           .post('/api/articles/invalid/comments')
           .send({ username: 'rogersop', body: 'comment test' })
@@ -327,7 +327,7 @@ describe('Testing app', () => {
           });
       });
 
-      test('GET: 400 status when given empty comment data', () => {
+      test('POST: 400 status when given empty comment data', () => {
         return request(app)
           .post('/api/articles/1/comments')
           .send({})
@@ -337,7 +337,7 @@ describe('Testing app', () => {
           });
       });
 
-      test('GET: 400 status when given incorrect comment data (invalid username)', () => {
+      test('POST: 404 status when given incorrect comment data (username that is not in our users database)', () => {
         return request(app)
           .post('/api/articles/1/comments')
           .send({ username: 'test' })
