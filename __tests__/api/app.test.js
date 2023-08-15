@@ -340,7 +340,17 @@ describe('Testing app', () => {
       test('POST: 404 status when given incorrect comment data (username that is not in our users database)', () => {
         return request(app)
           .post('/api/articles/1/comments')
-          .send({ username: 'test' })
+          .send({ username: 'test', body: 'test' })
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Resource not found');
+          });
+      });
+
+      test('POST: 400 status when given valid article_id and invalid body property', () => {
+        return request(app)
+          .post('/api/articles/1/comments')
+          .send({ username: 'rogersop' })
           .expect(400)
           .then(({ body }) => {
             expect(body.msg).toBe('Bad request');
