@@ -4,6 +4,7 @@ const seedTestData = require('../../db/data/test-data');
 const seed = require('../../db/seeds/seed');
 const db = require('../../db/connection');
 const endpoints = require('../../endpoints.json');
+const { expect } = require('@jest/globals');
 
 afterAll(() => {
   return db.end();
@@ -110,6 +111,100 @@ describe('Testing app', () => {
       test('GET: 400 status when given invalid article_id', () => {
         return request(app)
           .get('/api/articles/invalid_id')
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+    });
+
+    describe('Method PATCH', () => {
+      test('PATCH: 200 status', () => {
+        return request(app)
+          .patch('/api/articles/3')
+          .send({ inc_votes: 1 })
+          .expect(200);
+      });
+
+      test('PATCH: 200 status responds with the updated article', () => {
+        return request(app)
+          .patch('/api/articles/3')
+          .send({ inc_votes: -100 })
+          .then(({ body }) => {
+            const { article } = body;
+            const expectArticle = {
+              article_id: 3,
+              title: 'Eight pug gifs that remind me of mitch',
+              topic: 'mitch',
+              author: 'icellusedkars',
+              body: 'some gifs',
+              created_at: article.created_at,
+              votes: -100,
+              article_img_url:
+                'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
+            };
+
+            expect(article).toMatchObject(expectArticle);
+          });
+      });
+
+      test('PATCH: 200 status responds with the updated article and ignored extra properties on the request body', () => {
+        return request(app)
+          .patch('/api/articles/3')
+          .send({ inc_votes: 1, body: 'test', isMonday: true })
+          .then(({ body }) => {
+            const { article } = body;
+            const expectArticle = {
+              article_id: 3,
+              title: 'Eight pug gifs that remind me of mitch',
+              topic: 'mitch',
+              author: 'icellusedkars',
+              body: 'some gifs',
+              created_at: article.created_at,
+              votes: 1,
+              article_img_url:
+                'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
+            };
+
+            expect(article).toMatchObject(expectArticle);
+            expect(article).not.toContainKey('isMonday');
+          });
+      });
+
+      test('PATCH: 404 status when given article_id does not exist e.g /api/articles/300', () => {
+        return request(app)
+          .patch('/api/articles/300')
+          .send({ inc_votes: 1 })
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Resource not found');
+          });
+      });
+
+      test('PATCH: 400 status when given invalid article_id e.g /api/articles/invalid', () => {
+        return request(app)
+          .patch('/api/articles/invalid')
+          .send({ inc_votes: 1 })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+
+      test('PATCH: 400 status when given valid article_id but invalid request body', () => {
+        return request(app)
+          .patch('/api/articles/3')
+          .send({ inc_votes: 'string' })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+
+      test('PATCH: 400 status when given valid article_id but empty request body', () => {
+        return request(app)
+          .patch('/api/articles/3')
+          .send({})
           .expect(400)
           .then(({ body }) => {
             expect(body.msg).toBe('Bad request');
@@ -246,6 +341,144 @@ describe('Testing app', () => {
       test('GET: 400 status when given invalid article_id', () => {
         return request(app)
           .get('/api/articles/invalid-id/comments')
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+    });
+
+    describe('Method POST', () => {
+      test('POST: 201 status', () => {
+        return request(app)
+          .post('/api/articles/2/comments')
+          .send({ username: 'rogersop', body: 'comment test' })
+          .expect(201);
+      });
+
+      test('POST: 201 status responds wih the posted comment', () => {
+        return request(app)
+          .post('/api/articles/2/comments')
+          .send({ username: 'rogersop', body: 'comment test' })
+          .then(({ body }) => {
+            const { comment } = body;
+
+            const expectComment = {
+              comment_id: 19,
+              body: 'comment test',
+              article_id: 2,
+              author: 'rogersop',
+              votes: 0,
+              created_at: comment.created_at,
+            };
+
+            expect(comment).toMatchObject(expectComment);
+          });
+      });
+
+      test('POST: 201 status responds wih the posted comment and ignored extra properties on the request body', () => {
+        return request(app)
+          .post('/api/articles/2/comments')
+          .send({
+            username: 'rogersop',
+            body: 'Other comment test',
+            key: 'banana',
+          })
+          .then(({ body }) => {
+            const { comment } = body;
+
+            const expectComment = {
+              comment_id: 19,
+              body: 'Other comment test',
+              article_id: 2,
+              author: 'rogersop',
+              votes: 0,
+              created_at: comment.created_at,
+            };
+
+            expect(comment).not.toContainKey('key');
+            expect(comment).toMatchObject(expectComment);
+          });
+      });
+
+      test('POST: 404 status when given article_id does not exist e.g 999', () => {
+        return request(app)
+          .post('/api/articles/999/comments')
+          .send({ username: 'rogersop', body: 'comment test' })
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Resource not found');
+          });
+      });
+
+      test('POST: 400 status when given invalid article_id e.g /api/articles/invalid/comments', () => {
+        return request(app)
+          .post('/api/articles/invalid/comments')
+          .send({ username: 'rogersop', body: 'comment test' })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+
+      test('POST: 400 status when given empty comment data', () => {
+        return request(app)
+          .post('/api/articles/1/comments')
+          .send({})
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+
+      test('POST: 404 status when given incorrect comment data (username that is not in our users database)', () => {
+        return request(app)
+          .post('/api/articles/1/comments')
+          .send({ username: 'test', body: 'test' })
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Resource not found');
+          });
+      });
+
+      test('POST: 400 status when given valid article_id and invalid body property', () => {
+        return request(app)
+          .post('/api/articles/1/comments')
+          .send({ username: 'rogersop' })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+    });
+  });
+
+  describe('Endpoint /api/comments/:comment_id', () => {
+    describe('Method DELETE', () => {
+      test('DELETE: 204 status', () => {
+        return request(app)
+          .delete('/api/comments/1')
+          .expect(204)
+          .then(() => {
+            return db.query('SELECT * FROM comments WHERE comment_id = 1');
+          })
+          .then(({ rows }) => {
+            expect(rows.length).toBe(0);
+          });
+      });
+
+      test('DELETE: 404 status when given comment_id does not exist e.g /api/comments/999', () => {
+        return request(app)
+          .delete('/api/comments/999')
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Resource not found');
+          });
+      });
+
+      test('DELETE: 400 status when given invalid comment_id e.g /api/comments/ab', () => {
+        return request(app)
+          .delete('/api/comments/ab')
           .expect(400)
           .then(({ body }) => {
             expect(body.msg).toBe('Bad request');
