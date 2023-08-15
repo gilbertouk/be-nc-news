@@ -4,6 +4,7 @@ const seedTestData = require('../../db/data/test-data');
 const seed = require('../../db/seeds/seed');
 const db = require('../../db/connection');
 const endpoints = require('../../endpoints.json');
+const { expect } = require('@jest/globals');
 
 afterAll(() => {
   return db.end();
@@ -110,6 +111,100 @@ describe('Testing app', () => {
       test('GET: 400 status when given invalid article_id', () => {
         return request(app)
           .get('/api/articles/invalid_id')
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+    });
+
+    describe('Method PATCH', () => {
+      test('PATCH: 200 status', () => {
+        return request(app)
+          .patch('/api/articles/3')
+          .send({ inc_votes: 1 })
+          .expect(200);
+      });
+
+      test('PATCH: 200 status responds with the updated article', () => {
+        return request(app)
+          .patch('/api/articles/3')
+          .send({ inc_votes: -100 })
+          .then(({ body }) => {
+            const { article } = body;
+            const expectArticle = {
+              article_id: 3,
+              title: 'Eight pug gifs that remind me of mitch',
+              topic: 'mitch',
+              author: 'icellusedkars',
+              body: 'some gifs',
+              created_at: article.created_at,
+              votes: -100,
+              article_img_url:
+                'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
+            };
+
+            expect(article).toMatchObject(expectArticle);
+          });
+      });
+
+      test('PATCH: 200 status responds with the updated article and ignored extra properties on the request body', () => {
+        return request(app)
+          .patch('/api/articles/3')
+          .send({ inc_votes: 1, body: 'test', isMonday: true })
+          .then(({ body }) => {
+            const { article } = body;
+            const expectArticle = {
+              article_id: 3,
+              title: 'Eight pug gifs that remind me of mitch',
+              topic: 'mitch',
+              author: 'icellusedkars',
+              body: 'some gifs',
+              created_at: article.created_at,
+              votes: 1,
+              article_img_url:
+                'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
+            };
+
+            expect(article).toMatchObject(expectArticle);
+            expect(article).not.toContainKey('isMonday');
+          });
+      });
+
+      test('PATCH: 404 status when given article_id does not exist', () => {
+        return request(app)
+          .patch('/api/articles/300')
+          .send({ inc_votes: 1 })
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Resource not found');
+          });
+      });
+
+      test('PATCH: 400 status when given invalid article_id', () => {
+        return request(app)
+          .patch('/api/articles/invalid')
+          .send({ inc_votes: 1 })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+
+      test('PATCH: 400 status when given valid article_id but invalid request body', () => {
+        return request(app)
+          .patch('/api/articles/invalid')
+          .send({ inc_votes: 'string' })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+
+      test('PATCH: 400 status when given valid article_id but empty request body', () => {
+        return request(app)
+          .patch('/api/articles/invalid')
+          .send({})
           .expect(400)
           .then(({ body }) => {
             expect(body.msg).toBe('Bad request');
