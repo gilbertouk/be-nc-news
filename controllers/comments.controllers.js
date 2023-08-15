@@ -1,4 +1,7 @@
-const { selectCommentsByArticleId } = require('../models/comments.models');
+const {
+  selectCommentsByArticleId,
+  insertArticleComment,
+} = require('../models/comments.models');
 const { selectArticleById } = require('../models/articles.models');
 
 const getAllCommentsByArticleId = (req, res, next) => {
@@ -18,4 +21,20 @@ const getAllCommentsByArticleId = (req, res, next) => {
     });
 };
 
-module.exports = { getAllCommentsByArticleId };
+const postArticleComment = (req, res, next) => {
+  const { body } = req;
+  const { article_id } = req.params;
+
+  selectArticleById(article_id)
+    .then(() => {
+      return insertArticleComment(article_id, body);
+    })
+    .then((data) => {
+      res.status(201).send({ comment: data });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+module.exports = { getAllCommentsByArticleId, postArticleComment };

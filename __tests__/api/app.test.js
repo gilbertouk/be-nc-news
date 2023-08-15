@@ -4,6 +4,7 @@ const seedTestData = require('../../db/data/test-data');
 const seed = require('../../db/seeds/seed');
 const db = require('../../db/connection');
 const endpoints = require('../../endpoints.json');
+const { expect } = require('@jest/globals');
 
 afterAll(() => {
   return db.end();
@@ -246,6 +247,73 @@ describe('Testing app', () => {
       test('GET: 400 status when given invalid article_id', () => {
         return request(app)
           .get('/api/articles/invalid-id/comments')
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+    });
+
+    describe('Method POST', () => {
+      test('GET: 201 status responds wih the posted comment', () => {
+        return request(app)
+          .post('/api/articles/2/comments')
+          .send({ username: 'rogersop', body: 'comment test' })
+          .expect(201);
+      });
+
+      test('GET: 201 status', () => {
+        return request(app)
+          .post('/api/articles/2/comments')
+          .send({ username: 'rogersop', body: 'comment test' })
+          .then(({ body }) => {
+            const { comment } = body;
+
+            expect(comment).toHaveProperty('comment_id', 19);
+            expect(comment).toHaveProperty('body', 'comment test');
+            expect(comment).toHaveProperty('article_id', 2);
+            expect(comment).toHaveProperty('author', 'rogersop');
+            expect(comment).toHaveProperty('votes', 0);
+            expect(comment).toHaveProperty('created_at');
+            expect(comment).toHaveProperty('created_at');
+            expect(new Date(comment.created_at)).toBeDate();
+          });
+      });
+
+      test('GET: 404 status when given article_id does not exist', () => {
+        return request(app)
+          .post('/api/articles/200/comments')
+          .send({ username: 'rogersop', body: 'comment test' })
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Resource not found');
+          });
+      });
+
+      test('GET: 400 status when given invalid article_id', () => {
+        return request(app)
+          .post('/api/articles/invalid/comments')
+          .send({ username: 'rogersop', body: 'comment test' })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+
+      test('GET: 400 status when given empty comment data', () => {
+        return request(app)
+          .post('/api/articles/invalid/comments')
+          .send({})
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+
+      test('GET: 400 status when given incorrect comment data (invalid username)', () => {
+        return request(app)
+          .post('/api/articles/invalid/comments')
+          .send({ username: 'test' })
           .expect(400)
           .then(({ body }) => {
             expect(body.msg).toBe('Bad request');
