@@ -171,7 +171,7 @@ describe('Testing app', () => {
           });
       });
 
-      test('PATCH: 404 status when given article_id does not exist', () => {
+      test('PATCH: 404 status when given article_id does not exist e.g /api/articles/300', () => {
         return request(app)
           .patch('/api/articles/300')
           .send({ inc_votes: 1 })
@@ -181,7 +181,7 @@ describe('Testing app', () => {
           });
       });
 
-      test('PATCH: 400 status when given invalid article_id', () => {
+      test('PATCH: 400 status when given invalid article_id e.g /api/articles/invalid', () => {
         return request(app)
           .patch('/api/articles/invalid')
           .send({ inc_votes: 1 })
@@ -193,7 +193,7 @@ describe('Testing app', () => {
 
       test('PATCH: 400 status when given valid article_id but invalid request body', () => {
         return request(app)
-          .patch('/api/articles/invalid')
+          .patch('/api/articles/3')
           .send({ inc_votes: 'string' })
           .expect(400)
           .then(({ body }) => {
@@ -203,7 +203,7 @@ describe('Testing app', () => {
 
       test('PATCH: 400 status when given valid article_id but empty request body', () => {
         return request(app)
-          .patch('/api/articles/invalid')
+          .patch('/api/articles/3')
           .send({})
           .expect(400)
           .then(({ body }) => {

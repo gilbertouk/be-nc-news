@@ -25,7 +25,7 @@ const getAllArticles = (req, res, next) => {
     });
 };
 
-const pacthArticle = (req, res, next) => {
+const patchArticle = (req, res, next) => {
   const { body } = req;
   const { article_id } = req.params;
 
@@ -38,4 +38,4 @@ const pacthArticle = (req, res, next) => {
     });
 };
 
-module.exports = { getArticlesById, getAllArticles, pacthArticle };
+module.exports = { getArticlesById, getAllArticles, patchArticle };

@@ -3,7 +3,7 @@ const { getAllTopics } = require('./controllers/topics.controllers');
 const {
   getArticlesById,
   getAllArticles,
-  pacthArticle,
+  patchArticle,
 } = require('./controllers/articles.controllers');
 const {
   getAllCommentsByArticleId,
@@ -23,7 +23,7 @@ app.get('/api/articles/:article_id', getArticlesById);
 app.get('/api/articles', getAllArticles);
 app.get('/api/articles/:article_id/comments', getAllCommentsByArticleId);
 
-app.patch('/api/articles/:article_id', pacthArticle);
+app.patch('/api/articles/:article_id', patchArticle);
 
 app.use((req, res) => {
   res.status(404).send({ msg: 'Not found' });
@@ -38,7 +38,7 @@ app.use((err, req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  if (err.code === '22P02') {
+  if (err.code === '22P02' || err.code === '23502') {
     res.status(400).send({ msg: 'Bad request' });
   } else {
     next(err);
