@@ -26,4 +26,19 @@ const selectAllArticles = () => {
     });
 };
 
-module.exports = { selectArticleById, selectAllArticles };
+const updateArticle = (article_id, data) => {
+  return db
+    .query(`UPDATE articles SET votes = $1 WHERE article_id = $2 RETURNING *`, [
+      data.inc_votes,
+      article_id,
+    ])
+    .then((rows) => {
+      if (rows.rowCount === 0) {
+        return Promise.reject({ status: 404, msg: 'Resource not found' });
+      }
+
+      return rows.rows[0];
+    });
+};
+
+module.exports = { selectArticleById, selectAllArticles, updateArticle };
