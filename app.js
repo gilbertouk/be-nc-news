@@ -10,6 +10,7 @@ const {
   postArticleComment,
   deleteCommentById,
 } = require('./controllers/comments.controllers');
+const { getAllUsers } = require('./controllers/users.controllers');
 const endpoints = require('./endpoints.json');
 
 const app = express();
@@ -27,6 +28,7 @@ app.post('/api/articles/:article_id/comments', postArticleComment);
 app.patch('/api/articles/:article_id', patchArticle);
 
 app.delete('/api/comments/:comment_id', deleteCommentById);
+app.get('/api/users', getAllUsers);
 
 app.use((req, res) => {
   res.status(404).send({ msg: 'Not found' });
