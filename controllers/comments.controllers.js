@@ -1,5 +1,6 @@
 const {
   selectCommentsByArticleId,
+  insertArticleComment,
   deleteComment,
 } = require('../models/comments.models');
 const { selectArticleById } = require('../models/articles.models');
@@ -21,6 +22,19 @@ const getAllCommentsByArticleId = (req, res, next) => {
     });
 };
 
+const postArticleComment = (req, res, next) => {
+  const { body } = req;
+  const { article_id } = req.params;
+
+  insertArticleComment(article_id, body)
+    .then((data) => {
+      res.status(201).send({ comment: data });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
 const deleteCommentById = (req, res, next) => {
   const { comment_id } = req.params;
   deleteComment(comment_id)
@@ -32,4 +46,8 @@ const deleteCommentById = (req, res, next) => {
     });
 };
 
-module.exports = { getAllCommentsByArticleId, deleteCommentById };
+module.exports = {
+  getAllCommentsByArticleId,
+  postArticleComment,
+  deleteCommentById,
+};
