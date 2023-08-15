@@ -292,9 +292,7 @@ describe('Testing app', () => {
               },
             ];
 
-            expect(Array.isArray(users)).toBe(true);
-            expect(users).toHaveLength(4);
-            expect(users).toMatchObject(expectUsers);
+            expect(users).toEqual(expectUsers);
           });
       });
     });
