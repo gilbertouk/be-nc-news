@@ -16,6 +16,10 @@ app.get('/api/topics', getAllTopics);
 app.get('/api/articles/:article_id', getArticlesById);
 app.get('/api/articles', getAllArticles);
 
+app.use((req, res) => {
+  res.status(404).send({ msg: 'Not found' });
+});
+
 app.use((err, req, res, next) => {
   if (err.status && err.msg) {
     res.status(err.status).send({ msg: err.msg });

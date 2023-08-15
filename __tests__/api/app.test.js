@@ -14,6 +14,18 @@ beforeEach(() => {
 });
 
 describe('Testing app', () => {
+  describe('All /invalid-path', () => {
+    test('404: should return status 404 when given any invalid path', () => {
+      return request(app)
+        .get('/api/invalid-path')
+        .expect(404)
+        .then(({ body }) => {
+          const { msg } = body;
+          expect(msg).toBe('Not found');
+        });
+    });
+  });
+
   describe('Endpoint /api/topics', () => {
     describe('Method GET', () => {
       test('GET: 200 status', () => {
@@ -24,7 +36,7 @@ describe('Testing app', () => {
         return request(app)
           .get('/api/topics')
           .then(({ body }) => {
-            const topics = body;
+            const { topics } = body;
             const expectTopics = [
               { slug: 'mitch', description: 'The man, the Mitch, the legend' },
               { slug: 'cats', description: 'Not dogs' },
@@ -34,14 +46,6 @@ describe('Testing app', () => {
             expect(Array.isArray(topics)).toBe(true);
             expect(topics).toHaveLength(3);
             expect(topics).toMatchObject(expectTopics);
-          });
-      });
-
-      test('GET: 404 status with msg Not Found when given a wrong endpoint', () => {
-        return request(app)
-          .get('/api/topicsss')
-          .then(({ res }) => {
-            expect(res.statusMessage).toBe('Not Found');
           });
       });
     });
@@ -124,7 +128,7 @@ describe('Testing app', () => {
         return request(app)
           .get('/api/articles')
           .then(({ body }) => {
-            const articles = body;
+            const { articles } = body;
 
             expect(articles).toHaveLength(13);
 
@@ -152,7 +156,7 @@ describe('Testing app', () => {
         return request(app)
           .get('/api/articles')
           .then(({ body }) => {
-            const articles = body;
+            const { articles } = body;
             expect(articles).toBeSortedBy('created_at', { descending: true });
           });
       });
@@ -161,7 +165,9 @@ describe('Testing app', () => {
         return request(app)
           .get('/api/articles')
           .then(({ body }) => {
-            const articles = body;
+            const { articles } = body;
+
+            expect(articles).toHaveLength(13);
 
             articles.forEach((article) => {
               expect(article).not.toContainKey('body');
