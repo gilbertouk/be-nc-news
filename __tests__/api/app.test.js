@@ -4,7 +4,6 @@ const seedTestData = require('../../db/data/test-data');
 const seed = require('../../db/seeds/seed');
 const db = require('../../db/connection');
 const endpoints = require('../../endpoints.json');
-const { expect } = require('@jest/globals');
 
 afterAll(() => {
   return db.end();
@@ -114,6 +113,16 @@ describe('Testing app', () => {
           .expect(400)
           .then(({ body }) => {
             expect(body.msg).toBe('Bad request');
+          });
+      });
+
+      test('GET: 200 status responds with an article object data with comment_count property', () => {
+        return request(app)
+          .get('/api/articles/1')
+          .then(({ body }) => {
+            const { article } = body;
+
+            expect(article).toHaveProperty('comment_count', '11');
           });
       });
     });
