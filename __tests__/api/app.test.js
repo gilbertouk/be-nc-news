@@ -269,6 +269,93 @@ describe('Testing app', () => {
             });
           });
       });
+
+      test('GET: 200 status and should also accept the queries to filter the articles by topic e.g /api/articles?topic=cats', () => {
+        return request(app)
+          .get('/api/articles?topic=cats')
+          .then(({ body }) => {
+            const { articles } = body;
+            const expectArticles = [
+              {
+                author: 'rogersop',
+                title: 'UNCOVERED: catspiracy to bring down democracy',
+                article_id: 5,
+                topic: 'cats',
+                created_at: '2020-08-03T13:14:00.000Z',
+                votes: 0,
+                article_img_url:
+                  'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
+                comment_count: '2',
+              },
+            ];
+
+            expect(articles).toEqual(expectArticles);
+          });
+      });
+
+      test('GET: 200 status and should also accept the queries to filter the articles by topic e.g /api/articles?topic=mitch', () => {
+        return request(app)
+          .get('/api/articles?topic=mitch')
+          .then(({ body }) => {
+            const { articles } = body;
+
+            expect(articles).toHaveLength(12);
+            articles.forEach((article) => {
+              expect(article).toHaveProperty('topic', 'mitch');
+            });
+            expect(articles).toBeSortedBy('created_at', { descending: true });
+          });
+      });
+
+      test('GET: 200 status and should also accept the queries to sort_by, which sorts the articles by any valid column(author, title, article_id, topic, created_at, votes, article_img_url) (defaults to date)', () => {
+        return request(app)
+          .get('/api/articles?topic=mitch&sort_by=article_id')
+          .then(({ body }) => {
+            const { articles } = body;
+
+            expect(articles).toBeSortedBy('article_id', { descending: true });
+          });
+      });
+
+      test('GET: 400 status when given invalid column instead of (author, title, article_id, topic, created_at, votes, article_img_url) (defaults to date)', () => {
+        return request(app)
+          .get('/api/articles?sort_by=other-column-name')
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Invalid sort query');
+          });
+      });
+
+      test('GET: 200 status responds with articles order ascending by title', () => {
+        return request(app)
+          .get('/api/articles?sort_by=title&order=asc')
+          .then(({ body }) => {
+            const { articles } = body;
+            expect(articles).toBeSortedBy('title', { descending: false });
+          });
+      });
+
+      test('GET: 400 status when given invalid order instead of asc or desc', () => {
+        return request(app)
+          .get('/api/articles?order=other')
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Invalid order query');
+          });
+      });
+
+      test('GET: 200 status responds with correct articles data by given queries', () => {
+        return request(app)
+          .get('/api/articles?sort_by=title&order=asc&topic=mitch')
+          .then(({ body }) => {
+            const { articles } = body;
+            expect(articles).toBeSortedBy('title', { descending: false });
+            expect(articles).toHaveLength(12);
+            articles.forEach((article) => {
+              expect(article).toHaveProperty('topic', 'mitch');
+            });
+          });
+      });
     });
   });
 
