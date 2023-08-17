@@ -1,9 +1,19 @@
 const db = require('../db/connection');
 
-const selectCommentsByArticleId = (article_id) => {
+const selectCommentsByArticleId = (article_id, limit = 10, p = 1) => {
+  if (Number.isNaN(+limit)) {
+    return Promise.reject({ status: 400, msg: 'Bad request' });
+  }
+
+  if (Number.isNaN(+p)) {
+    return Promise.reject({ status: 400, msg: 'Bad request' });
+  }
+
   return db
     .query(
-      'SELECT comments.comment_id, comments.votes, comments.created_at, comments.author, comments.body, comments.article_id FROM comments WHERE comments.article_id = $1 ORDER BY comments.created_at DESC;',
+      `SELECT comments.comment_id, comments.votes, comments.created_at, comments.author, comments.body, comments.article_id FROM comments WHERE comments.article_id = $1 ORDER BY comments.created_at DESC LIMIT ${limit} OFFSET ${
+        limit * (p - 1)
+      };`,
       [article_id]
     )
     .then(({ rows }) => {

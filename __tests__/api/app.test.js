@@ -709,7 +709,7 @@ describe('Testing app', () => {
           .then(({ body }) => {
             const { comments } = body;
 
-            expect(comments).toHaveLength(11);
+            expect(comments).toHaveLength(10);
             expect(comments).toBeSortedBy('created_at', { descending: true });
           });
       });
@@ -737,6 +737,144 @@ describe('Testing app', () => {
       test('GET: 400 status when given invalid article_id', () => {
         return request(app)
           .get('/api/articles/invalid-id/comments')
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+
+      test('GET: 200 status responds with correct article comments data by given limit query', () => {
+        return request(app)
+          .get('/api/articles/1/comments?limit=8')
+          .then(({ body }) => {
+            const { comments } = body;
+            expect(comments).toHaveLength(8);
+          });
+      });
+
+      test('GET: 200 status responds with correct article comments data by default limit 10', () => {
+        return request(app)
+          .get('/api/articles/1/comments')
+          .then(({ body }) => {
+            const { comments } = body;
+            expect(comments).toHaveLength(10);
+          });
+      });
+
+      test('GET: 400 status responds when given query limit not a number e.g /api/articles/1/comments?limit=string', () => {
+        return request(app)
+          .get('/api/articles/1/comments?limit=string')
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+
+      test('GET: 200 status responds with the correct article comments when given query pages 1 e.g /api/articles/1/comments?limit=5&p=1', () => {
+        return request(app)
+          .get('/api/articles/1/comments?limit=5&p=1')
+          .then(({ body }) => {
+            const { comments } = body;
+            const expectComments = [
+              {
+                comment_id: 5,
+                votes: 0,
+                created_at: '2020-11-03T21:00:00.000Z',
+                author: 'icellusedkars',
+                body: 'I hate streaming noses',
+                article_id: 1,
+              },
+              {
+                comment_id: 2,
+                votes: 14,
+                created_at: '2020-10-31T03:03:00.000Z',
+                author: 'butter_bridge',
+                body: 'The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.',
+                article_id: 1,
+              },
+              {
+                comment_id: 18,
+                votes: 16,
+                created_at: '2020-07-21T00:20:00.000Z',
+                author: 'butter_bridge',
+                body: 'This morning, I showered for nine minutes.',
+                article_id: 1,
+              },
+              {
+                comment_id: 13,
+                votes: 0,
+                created_at: '2020-06-15T10:25:00.000Z',
+                author: 'icellusedkars',
+                body: 'Fruit pastilles',
+                article_id: 1,
+              },
+              {
+                comment_id: 7,
+                votes: 0,
+                created_at: '2020-05-15T20:19:00.000Z',
+                author: 'icellusedkars',
+                body: 'Lobster pot',
+                article_id: 1,
+              },
+            ];
+            expect(comments).toEqual(expectComments);
+          });
+      });
+
+      test('GET: 200 status responds with the correct article comments when given query pages 2 e.g /api/articles/1/comments?limit=5&p=2', () => {
+        return request(app)
+          .get('/api/articles/1/comments?limit=5&p=2')
+          .then(({ body }) => {
+            const { comments } = body;
+            const expectComments = [
+              {
+                comment_id: 5,
+                votes: 0,
+                created_at: '2020-11-03T21:00:00.000Z',
+                author: 'icellusedkars',
+                body: 'I hate streaming noses',
+                article_id: 1,
+              },
+              {
+                comment_id: 2,
+                votes: 14,
+                created_at: '2020-10-31T03:03:00.000Z',
+                author: 'butter_bridge',
+                body: 'The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.',
+                article_id: 1,
+              },
+              {
+                comment_id: 18,
+                votes: 16,
+                created_at: '2020-07-21T00:20:00.000Z',
+                author: 'butter_bridge',
+                body: 'This morning, I showered for nine minutes.',
+                article_id: 1,
+              },
+              {
+                comment_id: 13,
+                votes: 0,
+                created_at: '2020-06-15T10:25:00.000Z',
+                author: 'icellusedkars',
+                body: 'Fruit pastilles',
+                article_id: 1,
+              },
+              {
+                comment_id: 7,
+                votes: 0,
+                created_at: '2020-05-15T20:19:00.000Z',
+                author: 'icellusedkars',
+                body: 'Lobster pot',
+                article_id: 1,
+              },
+            ];
+            expect(comments).not.toEqual(expectComments);
+          });
+      });
+
+      test('GET: 400 status responds when given query page not a number e.g /api/articles/1/comments?limit=5&p=string', () => {
+        return request(app)
+          .get('/api/articles/1/comments?limit=5&p=string')
           .expect(400)
           .then(({ body }) => {
             expect(body.msg).toBe('Bad request');
