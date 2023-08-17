@@ -626,4 +626,39 @@ describe('Testing app', () => {
       });
     });
   });
+
+  describe('Endpoint /api/users/:username', () => {
+    describe('Method GET', () => {
+      test('GET: 200 status', () => {
+        return request(app).get('/api/users/icellusedkars').expect(200);
+      });
+
+      test('GET: 200 status responds with a user object', () => {
+        return request(app)
+          .get('/api/users/icellusedkars')
+          .then(({ body }) => {
+            const { user } = body;
+            expectUser = [
+              {
+                avatar_url:
+                  'https://avatars2.githubusercontent.com/u/24604688?s=460&v=4',
+                name: 'sam',
+                username: 'icellusedkars',
+              },
+            ];
+
+            expect(user).toEqual(expectUser);
+          });
+      });
+
+      test('GET: 404 status responds with err msg when given a username that is not in the database', () => {
+        return request(app)
+          .get('/api/users/test')
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Resource not found');
+          });
+      });
+    });
+  });
 });
