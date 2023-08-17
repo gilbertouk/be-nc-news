@@ -82,7 +82,7 @@
     }
   },
   "POST /api/articles/:article_id/comments": {
-    "description": "serves an object of the the posted comment",
+    "description": "serves an object of the posted comment",
     "queries": [],
     "exampleResponse": {
       "comment": {
@@ -162,7 +162,7 @@
     }
   },
   "POST /api/articles": {
-    "description": "serves an object of the the posted article",
+    "description": "serves an object of the posted article",
     "queries": [],
     "exampleResponse": {
       "article": {
@@ -176,6 +176,13 @@
         "article_img_url": "https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700",
         "comment_count": 0
       }
+    }
+  },
+  "POST /api/topics": {
+    "description": "serves an object of the posted topics",
+    "queries": [],
+    "exampleResponse": {
+      "topics": [{ "slug": "game", "description": "about videogames" }]
     }
   }
 }

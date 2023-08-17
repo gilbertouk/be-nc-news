@@ -49,6 +49,84 @@ describe('Testing app', () => {
           });
       });
     });
+
+    describe('Method POST', () => {
+      test('POST: 201 status', () => {
+        return request(app)
+          .post('/api/topics')
+          .send({
+            slug: 'game',
+            description: 'about videogames',
+          })
+          .expect(201);
+      });
+
+      test('POST: 201 status respond with a topic object containing the newly added topic', () => {
+        return request(app)
+          .post('/api/topics')
+          .send({
+            slug: 'game',
+            description: 'about videogames',
+          })
+          .then(({ body }) => {
+            const { topic } = body;
+
+            expect(topic).toEqual({
+              slug: 'game',
+              description: 'about videogames',
+            });
+          });
+      });
+
+      test('POST: 201 status respond with a topic object containing the newly added topic ignored extras properties on request body', () => {
+        return request(app)
+          .post('/api/topics')
+          .send({
+            slug: 'game',
+            description: 'about videogames',
+            extra: true,
+            topic_id: 18,
+          })
+          .then(({ body }) => {
+            const { topic } = body;
+
+            expect(topic).toEqual({
+              slug: 'game',
+              description: 'about videogames',
+            });
+          });
+      });
+
+      test('POST: 400 status respond when given empty request body', () => {
+        return request(app)
+          .post('/api/topics')
+          .send({})
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+
+      test('POST: 400 status respond when not given slug property on request body', () => {
+        return request(app)
+          .post('/api/topics')
+          .send({ description: 'about videogames' })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+
+      test('POST: 400 status respond when not given description property on request body', () => {
+        return request(app)
+          .post('/api/topics')
+          .send({ slug: 'game' })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+    });
   });
 
   describe('Endpoint /api', () => {
