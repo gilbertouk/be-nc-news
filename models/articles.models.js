@@ -59,10 +59,10 @@ const selectAllArticles = (topic, sort_by = 'created_at', order = 'desc') => {
 
 const updateArticle = (article_id, data) => {
   return db
-    .query(`UPDATE articles SET votes = $1 WHERE article_id = $2 RETURNING *`, [
-      data.inc_votes,
-      article_id,
-    ])
+    .query(
+      `UPDATE articles SET votes = votes + $1 WHERE article_id = $2 RETURNING *`,
+      [data.inc_votes, article_id]
+    )
     .then((rows) => {
       if (rows.rowCount === 0) {
         return Promise.reject({ status: 404, msg: 'Resource not found' });
