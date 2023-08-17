@@ -2,6 +2,7 @@ const {
   selectArticleById,
   selectAllArticles,
   updateArticle,
+  insertArticle,
 } = require('../models/articles.models');
 
 const getArticlesById = (req, res, next) => {
@@ -39,4 +40,17 @@ const patchArticle = (req, res, next) => {
     });
 };
 
-module.exports = { getArticlesById, getAllArticles, patchArticle };
+const postArticle = (req, res, next) => {
+  const { author, title, body, topic, article_img_url } = req.body;
+
+  insertArticle(author, title, body, topic, article_img_url)
+    .then((article) => {
+      res.status(201).send({ article });
+    })
+    .catch((err) => {
+      // console.log(err);
+      next(err);
+    });
+};
+
+module.exports = { getArticlesById, getAllArticles, patchArticle, postArticle };

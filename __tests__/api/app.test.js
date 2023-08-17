@@ -388,6 +388,179 @@ describe('Testing app', () => {
           });
       });
     });
+
+    describe('Method POST', () => {
+      test('POST: 201 status', () => {
+        return request(app)
+          .post('/api/articles')
+          .send({
+            author: 'butter_bridge',
+            title: 'Article test',
+            body: 'test article for northcoders API',
+            topic: 'paper',
+            article_img_url:
+              'https://static.vecteezy.com/ti/fotos-gratis/p1/1961329-pilha-de-jornais-gratis-foto.jpg',
+          })
+          .expect(201);
+      });
+
+      test('POST: 201 status with the newly added article', () => {
+        return request(app)
+          .post('/api/articles')
+          .send({
+            author: 'butter_bridge',
+            title: 'Article test',
+            body: 'test article for northcoders API',
+            topic: 'paper',
+            article_img_url:
+              'https://static.vecteezy.com/ti/fotos-gratis/p1/1961329-pilha-de-jornais-gratis-foto.jpg',
+          })
+          .then(({ body }) => {
+            const { article } = body;
+            const expectArticle = {
+              author: 'butter_bridge',
+              title: 'Article test',
+              body: 'test article for northcoders API',
+              topic: 'paper',
+              article_img_url:
+                'https://static.vecteezy.com/ti/fotos-gratis/p1/1961329-pilha-de-jornais-gratis-foto.jpg',
+              article_id: 14,
+              votes: 0,
+              created_at: article.created_at,
+              comment_count: 0,
+            };
+
+            expect(article).toEqual(expectArticle);
+          });
+      });
+
+      test('POST: 201 status with the newly added article with default article_img_url', () => {
+        return request(app)
+          .post('/api/articles')
+          .send({
+            author: 'butter_bridge',
+            title: 'Article test',
+            body: 'test article for northcoders API',
+            topic: 'paper',
+          })
+          .then(({ body }) => {
+            const { article } = body;
+            const expectArticle = {
+              author: 'butter_bridge',
+              title: 'Article test',
+              body: 'test article for northcoders API',
+              topic: 'paper',
+              article_img_url:
+                'https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700',
+              article_id: 14,
+              votes: 0,
+              created_at: article.created_at,
+              comment_count: 0,
+            };
+
+            expect(article).toEqual(expectArticle);
+          });
+      });
+
+      test('POST: 201 status with the newly added article and ignored extra properties on the request body', () => {
+        return request(app)
+          .post('/api/articles')
+          .send({
+            author: 'butter_bridge',
+            title: 'Article test',
+            body: 'test article for northcoders API',
+            topic: 'paper',
+            extra1: 'test',
+            extra2: 23,
+            extra3: false,
+          })
+          .then(({ body }) => {
+            const { article } = body;
+            const expectArticle = {
+              author: 'butter_bridge',
+              title: 'Article test',
+              body: 'test article for northcoders API',
+              topic: 'paper',
+              article_img_url:
+                'https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700',
+              article_id: 14,
+              votes: 0,
+              created_at: article.created_at,
+              comment_count: 0,
+            };
+
+            expect(article).toEqual(expectArticle);
+          });
+      });
+
+      test('POST: 404 status when given author does not exists e.g john_kenny', () => {
+        return request(app)
+          .post('/api/articles')
+          .send({
+            author: 'john_kenny',
+            title: 'Article test',
+            body: 'test article for northcoders API',
+            topic: 'paper',
+          })
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Resource not found');
+          });
+      });
+
+      test('POST: 404 status when given topic does not exists e.g test', () => {
+        return request(app)
+          .post('/api/articles')
+          .send({
+            author: 'butter_bridge',
+            title: 'Article test',
+            body: 'test article for northcoders API',
+            topic: 'test',
+          })
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Resource not found');
+          });
+      });
+
+      test('POST: 400 status when given empty request body', () => {
+        return request(app)
+          .post('/api/articles')
+          .send({})
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+
+      test('POST: 400 status when not given body property in request body', () => {
+        return request(app)
+          .post('/api/articles')
+          .send({
+            author: 'butter_bridge',
+            title: 'Article test',
+            topic: 'paper',
+          })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+
+      test('POST: 400 status when not given title property in request body', () => {
+        return request(app)
+          .post('/api/articles')
+          .send({
+            author: 'butter_bridge',
+            body: 'test article for northcoders API',
+            topic: 'paper',
+          })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+    });
   });
 
   describe('Endpoint /api/articles/:article_id/comments', () => {
