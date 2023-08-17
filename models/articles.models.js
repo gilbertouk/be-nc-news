@@ -19,10 +19,18 @@ const selectArticleById = (article_id) => {
     });
 };
 
-const selectAllArticles = (topic, sort_by = 'created_at', order = 'desc') => {
+const selectAllArticles = (
+  topic,
+  sort_by = 'created_at',
+  order = 'desc',
+  limit = 10,
+  p = 1
+) => {
   let baseSqlString = `SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.article_id) AS comment_count
   FROM articles
   LEFT JOIN comments ON articles.article_id = comments.article_id `;
+
+  let totalCountBaseSqlString = `SELECT COUNT(article_id) FROM articles `;
 
   const arrQuery = [];
 
@@ -46,15 +54,38 @@ const selectAllArticles = (topic, sort_by = 'created_at', order = 'desc') => {
 
   if (topic) {
     baseSqlString += `WHERE articles.topic = $1 `;
+    totalCountBaseSqlString += `WHERE topic = $1 `;
     arrQuery.push(topic);
   }
 
-  baseSqlString += `GROUP BY articles.article_id
-  ORDER BY articles.${sort_by} ${order};`;
+  if (Number.isNaN(+limit)) {
+    return Promise.reject({ status: 400, msg: 'Bad request' });
+  }
 
-  return db.query(baseSqlString, arrQuery).then(({ rows }) => {
-    return rows;
-  });
+  if (Number.isNaN(+p)) {
+    return Promise.reject({ status: 400, msg: 'Bad request' });
+  }
+
+  baseSqlString += `GROUP BY articles.article_id
+  ORDER BY articles.${sort_by} ${order} LIMIT ${limit} OFFSET ${
+    limit * (p - 1)
+  };`;
+
+  const articles = { total_count: 0 };
+
+  return db
+    .query(totalCountBaseSqlString, arrQuery)
+    .then(({ rows }) => {
+      articles.total_count = +rows[0].count - +limit;
+      return;
+    })
+    .then(() => {
+      return db.query(baseSqlString, arrQuery);
+    })
+    .then(({ rows }) => {
+      articles.articles = rows;
+      return articles;
+    });
 };
 
 const updateArticle = (article_id, data) => {

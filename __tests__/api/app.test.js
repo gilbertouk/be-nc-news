@@ -256,7 +256,7 @@ describe('Testing app', () => {
           .then(({ body }) => {
             const { articles } = body;
 
-            expect(articles).toHaveLength(13);
+            expect(articles).toHaveLength(10);
 
             articles.forEach((article) => {
               expect(article).toHaveProperty('author', expect.any(String));
@@ -293,7 +293,7 @@ describe('Testing app', () => {
           .then(({ body }) => {
             const { articles } = body;
 
-            expect(articles).toHaveLength(13);
+            expect(articles).toHaveLength(10);
 
             articles.forEach((article) => {
               expect(article).not.toContainKey('body');
@@ -330,7 +330,7 @@ describe('Testing app', () => {
           .then(({ body }) => {
             const { articles } = body;
 
-            expect(articles).toHaveLength(12);
+            expect(articles).toHaveLength(10);
             articles.forEach((article) => {
               expect(article).toHaveProperty('topic', 'mitch');
             });
@@ -381,10 +381,115 @@ describe('Testing app', () => {
           .then(({ body }) => {
             const { articles } = body;
             expect(articles).toBeSortedBy('title', { descending: false });
-            expect(articles).toHaveLength(12);
+            expect(articles).toHaveLength(10);
             articles.forEach((article) => {
               expect(article).toHaveProperty('topic', 'mitch');
             });
+          });
+      });
+
+      test('GET: 200 status responds with correct articles data by given limit query', () => {
+        return request(app)
+          .get('/api/articles?limit=8')
+          .then(({ body }) => {
+            const { articles } = body;
+            expect(articles).toHaveLength(8);
+          });
+      });
+
+      test('GET: 200 status responds with correct articles data by default limit 10', () => {
+        return request(app)
+          .get('/api/articles')
+          .then(({ body }) => {
+            const { articles } = body;
+            expect(articles).toHaveLength(10);
+          });
+      });
+
+      test('GET: 400 status responds when given query limit not a number e.g /api/articles?limit=string', () => {
+        return request(app)
+          .get('/api/articles?limit=string')
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+
+      test('GET: 200 status responds with the correct articles when given query pages e.g /api/articles?sort_by=article_id&order=asc&p=2', () => {
+        return request(app)
+          .get('/api/articles?sort_by=article_id&order=asc&p=2')
+          .then(({ body }) => {
+            const { articles } = body;
+            const expectArticles = [
+              {
+                author: 'icellusedkars',
+                title: 'Am I a cat?',
+                article_id: 11,
+                topic: 'mitch',
+                created_at: '2020-01-15T22:21:00.000Z',
+                votes: 0,
+                article_img_url:
+                  'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
+                comment_count: '0',
+              },
+              {
+                author: 'butter_bridge',
+                title: 'Moustache',
+                article_id: 12,
+                topic: 'mitch',
+                created_at: '2020-10-11T11:24:00.000Z',
+                votes: 0,
+                article_img_url:
+                  'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
+                comment_count: '0',
+              },
+              {
+                author: 'butter_bridge',
+                title: 'Another article about Mitch',
+                article_id: 13,
+                topic: 'mitch',
+                created_at: '2020-10-11T11:24:00.000Z',
+                votes: 0,
+                article_img_url:
+                  'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
+                comment_count: '0',
+              },
+            ];
+            expect(articles).toEqual(expectArticles);
+          });
+      });
+
+      test('GET: 200 status responds with the correct articles when given query pages and limit e.g /api/articles?p=2&limit=5', () => {
+        return request(app)
+          .get('/api/articles?p=2&limit=5')
+          .then(({ body }) => {
+            const { articles } = body;
+            expect(articles).toHaveLength(5);
+          });
+      });
+
+      test('GET: 400 status responds when given query page not a number e.g /api/articles?p=string', () => {
+        return request(app)
+          .get('/api/articles?p=string')
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+
+      test('GET: 200 status responds with total_count property, displaying the total number of articles discounting the limit', () => {
+        return request(app)
+          .get('/api/articles')
+          .then(({ body }) => {
+            expect(body).toHaveProperty('total_count', 3);
+          });
+      });
+
+      test('GET: 200 status responds with total_count property correct when given limit query', () => {
+        return request(app)
+          .get('/api/articles?limit=5')
+          .then(({ body }) => {
+            expect(body).toHaveProperty('total_count', 8);
           });
       });
     });
