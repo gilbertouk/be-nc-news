@@ -17,10 +17,12 @@ const getArticlesById = (req, res, next) => {
 };
 
 const getAllArticles = (req, res, next) => {
-  const { topic, sort_by, order } = req.query;
-  selectAllArticles(topic, sort_by, order)
+  const { topic, sort_by, order, limit, p } = req.query;
+  selectAllArticles(topic, sort_by, order, limit, p)
     .then((data) => {
-      res.status(200).send({ articles: data });
+      res
+        .status(200)
+        .send({ articles: data.articles, total_count: data.total_count });
     })
     .catch((err) => {
       next(err);
