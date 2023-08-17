@@ -48,8 +48,23 @@ const insertArticleComment = (article_id, data) => {
     });
 };
 
+const updateComment = (comment_id, inc_votes) => {
+  return db
+    .query(
+      `UPDATE comments SET votes = votes + $1 WHERE comment_id = $2 RETURNING *`,
+      [inc_votes, comment_id]
+    )
+    .then((rows) => {
+      if (rows.rowCount === 0) {
+        return Promise.reject({ status: 404, msg: 'Resource not found' });
+      }
+      return rows.rows[0];
+    });
+};
+
 module.exports = {
   selectCommentsByArticleId,
   insertArticleComment,
   deleteComment,
+  updateComment,
 };

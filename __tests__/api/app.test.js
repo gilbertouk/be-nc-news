@@ -138,7 +138,7 @@ describe('Testing app', () => {
       test('PATCH: 200 status responds with the updated article', () => {
         return request(app)
           .patch('/api/articles/3')
-          .send({ inc_votes: -100 })
+          .send({ inc_votes: 20 })
           .then(({ body }) => {
             const { article } = body;
             const expectArticle = {
@@ -148,7 +148,29 @@ describe('Testing app', () => {
               author: 'icellusedkars',
               body: 'some gifs',
               created_at: article.created_at,
-              votes: -100,
+              votes: 20,
+              article_img_url:
+                'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
+            };
+
+            expect(article).toMatchObject(expectArticle);
+          });
+      });
+
+      test('PATCH: 200 status responds with the updated article when given negative inc_vote ', () => {
+        return request(app)
+          .patch('/api/articles/1')
+          .send({ inc_votes: -10 })
+          .then(({ body }) => {
+            const { article } = body;
+            const expectArticle = {
+              article_id: 1,
+              title: 'Living in the shadow of a great man',
+              topic: 'mitch',
+              author: 'butter_bridge',
+              body: 'I find this existence challenging',
+              created_at: article.created_at,
+              votes: 90,
               article_img_url:
                 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
             };
@@ -575,6 +597,113 @@ describe('Testing app', () => {
       test('DELETE: 400 status when given invalid comment_id e.g /api/comments/ab', () => {
         return request(app)
           .delete('/api/comments/ab')
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+    });
+
+    describe('Method PATCH', () => {
+      test('PATCH: 200 status', () => {
+        return request(app)
+          .patch('/api/comments/1')
+          .send({ inc_votes: 1 })
+          .expect(200);
+      });
+
+      test('PATCH: 200 status responds with the updated comment', () => {
+        return request(app)
+          .patch('/api/comments/1')
+          .send({ inc_votes: 4 })
+          .then(({ body }) => {
+            const { comment } = body;
+            const expectComment = {
+              article_id: 9,
+              author: 'butter_bridge',
+              body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+              comment_id: 1,
+              created_at: '2020-04-06T12:17:00.000Z',
+              votes: 20,
+            };
+
+            expect(comment).toEqual(expectComment);
+          });
+      });
+
+      test('PATCH: 200 status responds with the updated comment when given negative inc_votes', () => {
+        return request(app)
+          .patch('/api/comments/1')
+          .send({ inc_votes: -20 })
+          .then(({ body }) => {
+            const { comment } = body;
+            const expectComment = {
+              article_id: 9,
+              author: 'butter_bridge',
+              body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+              comment_id: 1,
+              created_at: '2020-04-06T12:17:00.000Z',
+              votes: -4,
+            };
+
+            expect(comment).toEqual(expectComment);
+          });
+      });
+
+      test('PATCH: 200 status responds with the updated comment and ignored extra properties on the request body', () => {
+        return request(app)
+          .patch('/api/comments/1')
+          .send({ inc_votes: 20, body: 'test update', isFalse: true })
+          .then(({ body }) => {
+            const { comment } = body;
+            const expectComment = {
+              article_id: 9,
+              author: 'butter_bridge',
+              body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+              comment_id: 1,
+              created_at: '2020-04-06T12:17:00.000Z',
+              votes: 36,
+            };
+
+            expect(comment).toEqual(expectComment);
+            expect(comment).not.toContainKey('isFalse');
+          });
+      });
+
+      test('PATCH: 404 status when given comment_id does not exist e.g /api/comments/999', () => {
+        return request(app)
+          .patch('/api/comments/999')
+          .send({ inc_votes: 1 })
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Resource not found');
+          });
+      });
+
+      test('PATCH: 400 status when given invalid comment_id e.g /api/comments/abc', () => {
+        return request(app)
+          .patch('/api/comments/abc')
+          .send({ inc_votes: 1 })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+
+      test('PATCH: 400 status when given valid comment_id but invalid request body', () => {
+        return request(app)
+          .patch('/api/comments/1')
+          .send({ inc_votes: 'string' })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+
+      test('PATCH: 400 status when given valid comment_id but empty request body', () => {
+        return request(app)
+          .patch('/api/comments/1')
+          .send({})
           .expect(400)
           .then(({ body }) => {
             expect(body.msg).toBe('Bad request');
