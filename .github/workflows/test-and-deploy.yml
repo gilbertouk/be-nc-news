@@ -21,6 +21,11 @@ jobs:
     needs: test-utils
     runs-on: ubuntu-latest
     steps:
+      - name: Set Timezone Action
+        uses: szenius/set-timezone@v1.2
+        with:
+          timezoneLinux: 'Europe/London'
+
       - name: Checkout Repo
         uses: actions/checkout@v3
 
@@ -34,8 +39,8 @@ jobs:
           postgresql user: test_user
           postgresql password: test_password
 
-      - name: check date
-        run: date
+      - name: Check Time Zone
+        run: date && ls -l /etc/localtime
 
       - name: run app tests
         run: PGDATABASE=my_test_db PGUSER=test_user PGPASSWORD=test_password npm run app-test
