@@ -1,7 +1,7 @@
 name: Test & Deploy
 run-name: Testing app
 on:
-  push:
+  pull_request:
     branches:
       - main
 jobs:
