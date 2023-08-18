@@ -1,6 +1,8 @@
 const handleCustomErrors = (err, req, res, next) => {
   if (err.status && err.msg) {
     res.status(err.status).send({ msg: err.msg });
+  } else if (err.statusCode === 400 && err.type === 'entity.parse.failed') {
+    res.status(err.status).send({ msg: 'Bad request' });
   } else {
     next(err);
   }
