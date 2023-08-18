@@ -184,5 +184,10 @@
     "exampleResponse": {
       "topics": [{ "slug": "game", "description": "about videogames" }]
     }
+  },
+  "DELETE /api/articles/:article_id": {
+    "description": "delete an article based on an article_id, and its respective comments",
+    "queries": [],
+    "exampleResponse": {}
   }
 }
