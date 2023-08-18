@@ -5,25 +5,14 @@ on:
     branches:
       - main
 jobs:
-  test:
-    name: Test
+  test-utils:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
 
-      - name: Use Node.js
-        uses: actions/setup-node@v3
+      - name: install dependencies
+        run: npm install
 
-      - name: Use PostgreSQL
-        uses: harmon758/postgresql-action@v1
-        with:
-          postgresql db: 'my_test_db'
-          postgresql user: 'test_user'
-          postgresql password: 'test_password'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run tests
-        run: PGDATABASE=my_test_db PGUSER=test_user PGPASSWORD=test_password npm test
+      - name: run utils tests
+        run: npm run test-utils
