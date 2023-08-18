@@ -320,6 +320,45 @@ describe('Testing app', () => {
           });
       });
     });
+
+    describe('Method DELETE', () => {
+      test('DELETE: 204 status', () => {
+        return request(app)
+          .delete('/api/articles/1')
+          .expect(204)
+          .then(() => {
+            return db.query('SELECT * FROM comments WHERE article_id = 1');
+          })
+          .then(({ rows }) => {
+            expect(rows.length).toBe(0);
+            return;
+          })
+          .then(() => {
+            return db.query('SELECT * FROM articles WHERE article_id = 1');
+          })
+          .then(({ rows }) => {
+            expect(rows.length).toBe(0);
+          });
+      });
+
+      test('DELETE: 404 status when given article_id does not exist e.g /api/articles/999', () => {
+        return request(app)
+          .delete('/api/articles/999')
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Resource not found');
+          });
+      });
+
+      test('DELETE: 400 status when given invalid article_id e.g /api/articles/abc', () => {
+        return request(app)
+          .delete('/api/articles/abc')
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe('Bad request');
+          });
+      });
+    });
   });
 
   describe('Endpoint /api/articles', () => {
