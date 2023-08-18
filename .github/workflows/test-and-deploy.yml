@@ -44,3 +44,21 @@ jobs:
 
       - name: run app tests
         run: PGDATABASE=my_test_db PGUSER=test_user PGPASSWORD=test_password npm run app-test
+
+  test-api-with-live-db:
+    needs: test-api
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Timezone Action
+        uses: szenius/set-timezone@v1.2
+        with:
+          timezoneLinux: 'Europe/London'
+
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: install dependencies
+        run: npm install
+
+      - name: run app tests on live db
+        run: NODE_ENV=production DATABASE_URL=${{secrets.DATABASE_URL}} npm run app-test
