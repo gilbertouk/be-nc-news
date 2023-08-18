@@ -154,7 +154,7 @@ describe('Testing app', () => {
         return request(app).get('/api/articles/1').expect(200);
       });
 
-      test('GET: 200 status responds with an article object data', () => {
+      test.only('GET: 200 status responds with an article object data', () => {
         return request(app)
           .get('/api/articles/1')
           .then(({ body }) => {
@@ -171,6 +171,7 @@ describe('Testing app', () => {
               article_img_url:
                 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
             };
+            console.log(article);
 
             expect(article).toMatchObject(expectArticle);
           });
