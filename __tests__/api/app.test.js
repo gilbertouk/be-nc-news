@@ -154,7 +154,7 @@ describe('Testing app', () => {
         return request(app).get('/api/articles/1').expect(200);
       });
 
-      test.only('GET: 200 status responds with an article object data', () => {
+      test('GET: 200 status responds with an article object data', () => {
         return request(app)
           .get('/api/articles/1')
           .then(({ body }) => {
@@ -166,12 +166,11 @@ describe('Testing app', () => {
               topic: 'mitch',
               author: 'butter_bridge',
               body: 'I find this existence challenging',
-              created_at: article.created_at,
+              created_at: '2020-07-09T20:11:00.000Z',
               votes: 100,
               article_img_url:
                 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
             };
-            console.log(article);
 
             expect(article).toMatchObject(expectArticle);
           });
