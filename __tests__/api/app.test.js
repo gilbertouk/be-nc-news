@@ -594,11 +594,11 @@ describe('Testing app', () => {
           });
       });
 
-      test('GET: 200 status responds with total_count property, displaying the total number of articles discounting the limit', () => {
+      test('GET: 200 status responds with total_count property, displaying the total number of articles', () => {
         return request(app)
           .get('/api/articles')
           .then(({ body }) => {
-            expect(body).toHaveProperty('total_count', 3);
+            expect(body).toHaveProperty('total_count', 13);
           });
       });
 
@@ -606,7 +606,7 @@ describe('Testing app', () => {
         return request(app)
           .get('/api/articles?limit=5')
           .then(({ body }) => {
-            expect(body).toHaveProperty('total_count', 8);
+            expect(body).toHaveProperty('total_count', 13);
           });
       });
     });
