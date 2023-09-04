@@ -76,7 +76,7 @@ const selectAllArticles = (
   return db
     .query(totalCountBaseSqlString, arrQuery)
     .then(({ rows }) => {
-      articles.total_count = +rows[0].count - +limit;
+      articles.total_count = +rows[0].count; // - +limit;
       return;
     })
     .then(() => {
