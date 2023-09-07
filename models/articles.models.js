@@ -68,7 +68,7 @@ const selectAllArticles = (
   }
 
   baseSqlString += `GROUP BY articles.article_id
-  ORDER BY articles.${sort_by} ${order} LIMIT ${limit} OFFSET ${
+  ORDER BY ${sort_by} ${order} LIMIT ${limit} OFFSET ${
     limit * (p - 1)
   };`;
 
