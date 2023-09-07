@@ -42,6 +42,7 @@ const selectAllArticles = (
     'created_at',
     'votes',
     'article_img_url',
+    'comment_count'
   ];
   if (!sort_byFilter.includes(sort_by)) {
     return Promise.reject({ status: 400, msg: 'Invalid sort query' });
